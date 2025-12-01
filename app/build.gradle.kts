@@ -39,12 +39,37 @@ android {
         buildConfig = true
     }
 
-    signingConfigs.create("emulator") {
-        if (secret.isNotEmpty()) {
-            keyAlias = secret.getProperty("keyAlias")
-            keyPassword = secret.getProperty("keyPassword")
-            storeFile = rootProject.file(secret.getProperty("storeFile"))
-            storePassword = secret.getProperty("storePassword")
+    signingConfigs {
+        create("emulator") {
+            def propsFile = rootProject.file("keystore.properties")
+            
+            // 1. Verifica se o arquivo existe (criado pela ação de decodificação)
+            if (propsFile.exists()) {
+                def keystoreProperties = new Properties()
+                
+                // 2. Carrega as propriedades de forma segura (Groovy withInputStream fecha o stream)
+                propsFile.withInputStream { keystoreProperties.load(it) }
+
+                // 3. Define as propriedades de assinatura
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                
+                // O storeFile precisa ser um objeto File, e é acessado pelo caminho
+                def storeFilePath = keystoreProperties.getProperty("storeFile")
+                if (storeFilePath != null) {
+                    storeFile = rootProject.file(storeFilePath)
+                } else {
+                    throw new GradleException("A chave 'storeFile' é obrigatória em keystore.properties para a configuração 'emulator'.")
+                }
+                
+                storePassword = keystoreProperties.getProperty("storePassword")
+                
+            } else {
+                // 4. Tratamento de erro ou aviso (importante para builds locais que não usam CI/CD)
+                println "AVISO: Arquivo 'keystore.properties' não encontrado no diretório raiz do projeto. A configuração de assinatura 'emulator' não foi aplicada."
+                // Se a falha for obrigatória (build de release), use:
+                // throw new GradleException("Arquivo keystore.properties não encontrado. O build falhou.")
+            }
         }
     }
 
