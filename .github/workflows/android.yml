@@ -32,8 +32,9 @@ jobs:
 
     runs-on: ${{ github.event.inputs.runner_os }}
     env:
-      ENCODED_PROPS: "true"
       VERSION_SUFFIX: ${{ github.event.inputs.build_suffix_choice }}
+      ENCODED_KEYSTORE: ${{ secrets.SIGNING_KEY }}
+      ENCODED_PROPS: ${{ secrets.KEYSTORE_PROPERTIES }}
     steps:
       - uses: actions/checkout@v4.1.6
         with:
@@ -45,10 +46,7 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Decode Keystore
-        env:
-          ENCODED_KEYSTORE: ${{ secrets.SIGNING_KEY }}
-          ENCODED_PROPS: ${{ secrets.KEYSTORE_PROPERTIES }}
+      - name: Decode Keystore      
         run: |
           if [ "$ENCODED_PROPS" == "" ]; then
             exit
