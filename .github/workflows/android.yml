@@ -3,6 +3,26 @@ name: Android CI
 on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      build_suffix_choice:
+        description: 'Selecione o Sufixo de Versão (VERSION_SUFFIX)'
+        required: false
+        default: 'debug' 
+        type: choice
+        options:
+          - debug
+          - release
+          - emulator
+          - '' # Opção para Sufixo vazio
+      runner_os:
+        description: 'Selecione o Sistema Operacional da Runner (runs-on)'
+        required: true
+        default: 'ubuntu-latest'
+        type: choice
+        options:
+          - ubuntu-latest
+          - ubuntu-24.04
+          - ubuntu-22.04
   push:
     branches:
       - master
@@ -10,8 +30,9 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
-
+    runs-on: ${{ github.event.inputs.runner_os }}
+    env:
+      VERSION_SUFFIX: ${{ github.event.inputs.build_suffix_choice }}
     steps:
       - uses: actions/checkout@v4.1.6
         with:
