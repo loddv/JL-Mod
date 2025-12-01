@@ -32,6 +32,7 @@ jobs:
 
     runs-on: ${{ github.event.inputs.runner_os }}
     env:
+      ENCODED_PROPS: "true"
       VERSION_SUFFIX: ${{ github.event.inputs.build_suffix_choice }}
     steps:
       - uses: actions/checkout@v4.1.6
