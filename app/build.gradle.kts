@@ -35,17 +35,28 @@ android {
     }
 
     signingConfigs {
-        create("emulator") {
-            rootProject.file("keystore.properties").takeIf(File::isFile)?.inputStream().use {
-                val keystoreProperties = Properties()
-                keystoreProperties.load(it)
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
-                storeFile = rootProject.file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
-            }
+    create("emulator") {
+        def propsFile = rootProject.file("keystore.properties")
+        
+        // Verifica se o arquivo existe antes de tentar carregar
+        if (propsFile.exists()) {
+            def keystoreProperties = new Properties()
+            propsFile.withInputStream { keystoreProperties.load(it) }
+
+            // Acessa as propriedades
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+            
+            // Certifique-se de que storeFile seja um objeto File
+            storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+            storePassword = keystoreProperties.getProperty("storePassword")
+        } else {
+            // Se esta configuração é obrigatória, você deve lançar um erro
+            // throw new GradleException("Arquivo keystore.properties não encontrado em ${propsFile.absolutePath}")
         }
     }
+}
+
 
     buildTypes {
         release {
