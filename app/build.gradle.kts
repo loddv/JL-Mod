@@ -46,8 +46,6 @@ android {
             }
         }
     }
-}
-
 
     buildTypes {
         release {
